@@ -6,7 +6,7 @@ import (
 	"os/user"
 )
 
-func main() {
+func outCurrentUserFolderInfo() {
 	user, err := user.Current()
 	if err != nil {
 		panic(err)
@@ -33,10 +33,31 @@ func main() {
 		panic(err)
 	}
 
-	for _, f2 := range files {
-		_, err = fileOutput.WriteString(f2.Name() + "\n")
+	for _, f := range files {
+		_, err = fileOutput.WriteString(f.Name() + "\n")
 		if err != nil {
 			panic(err)
 		}
 	}
+}
+
+func createWorkingFolder() {
+	const workingFolderName = ".git-issue-tracker"
+	const gitIgnoreFileName = ".gitignore"
+
+	gitIgnoreFile, err := os.OpenFile(gitIgnoreFileName, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	gitIgnoreFile.WriteString("\n" + workingFolderName + "\n")
+
+	// Create folder with ability to for all users to read and write into it
+	err = os.Mkdir(workingFolderName, 0666)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func main() {
+	createWorkingFolder()
 }

@@ -10,6 +10,7 @@ Current User [Home] directory is C:\Users\Jacob Ryan and contains files
 .electron
 .emulator_console_auth_token
 .eslintrc
+.gitconfig
 .gradle
 .node_repl_history
 .nuget
