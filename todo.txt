@@ -1,7 +1,9 @@
-* Create folder in working directory
-* Add issue-tracker folder to .gitignore exceptions
 * Create configuration file
 * Create issue file (with markdown abilities for comments); file name should contain date and time and issue number (and issue name??)
 * Add comment to issue
 * Normalize method to "normalize" issue numbers after merging
 * Add method to "merge" issues branch with default remote repository and call normalize method after that
+
+DONE
+* Create folder in working directory
+* Add issue-tracker folder to .gitignore exceptions
