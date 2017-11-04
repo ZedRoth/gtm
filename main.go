@@ -42,7 +42,7 @@ func outCurrentUserFolderInfo() {
 }
 
 func createWorkingFolder() {
-	const workingFolderName = ".git-issue-tracker"
+	const workingFolderName = ".git-task-manager"
 	const gitIgnoreFileName = ".gitignore"
 
 	gitIgnoreFile, err := os.OpenFile(gitIgnoreFileName, os.O_RDWR|os.O_CREATE, 0666)
