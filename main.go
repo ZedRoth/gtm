@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
+	"path/filepath"
+	"strings"
 )
 
 func outCurrentUserFolderInfo() {
@@ -41,23 +44,42 @@ func outCurrentUserFolderInfo() {
 	}
 }
 
-func createWorkingFolder() {
+func createWorkingFolder(folderPath string) {
 	const workingFolderName = ".git-task-manager"
-	const gitIgnoreFileName = ".gitignore"
+	const gitignoreFileName = ".gitignore"
 
-	gitIgnoreFile, err := os.OpenFile(gitIgnoreFileName, os.O_RDWR|os.O_CREATE, 0666)
+	var err error
+
+	folderPath, err = filepath.Abs(folderPath)
 	if err != nil {
 		panic(err)
 	}
-	gitIgnoreFile.WriteString("\n" + workingFolderName + "\n")
+
+	folderPath = strings.TrimRight(folderPath, "/") + "/"
+	workingFolderPath, gitignoreFilePath := folderPath+workingFolderName, folderPath+gitignoreFileName
+
+	fmt.Println(workingFolderPath)
+	fmt.Println(gitignoreFilePath)
+
+	gitIgnoreFile, err := os.OpenFile(gitignoreFilePath, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	gitIgnoreFile.WriteString("\n" + workingFolderPath + "\n")
 
 	// Create folder with ability to for all users to read and write into it
-	err = os.Mkdir(workingFolderName, 0666)
+	err = os.Mkdir(workingFolderPath, 0666)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func main() {
-	createWorkingFolder()
+	folderPath := ""
+	argsWithoutProgram := os.Args[1:]
+	if len(argsWithoutProgram) > 0 {
+		folderPath = argsWithoutProgram[0]
+	}
+
+	createWorkingFolder(folderPath)
 }
