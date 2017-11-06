@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 )
 
 func outCurrentUserFolderInfo() {
@@ -47,35 +46,54 @@ func outCurrentUserFolderInfo() {
 func createWorkingFolder(folderPath string) {
 	const workingFolderName = ".git-task-manager"
 	const gitignoreFileName = ".gitignore"
+	// 0666 - ability for all users to read and write into it
+	const newItemsPermissions = 0666
 
 	var err error
+
+	if len(folderPath) == 0 {
+		folderPath = "."
+	}
 
 	folderPath, err = filepath.Abs(folderPath)
 	if err != nil {
 		panic(err)
 	}
 
-	folderPath = strings.TrimRight(folderPath, "/") + "/"
-	workingFolderPath, gitignoreFilePath := folderPath+workingFolderName, folderPath+gitignoreFileName
+	_, err = os.Stat(folderPath)
+	if os.IsNotExist(err) {
+		os.MkdirAll(folderPath, newItemsPermissions)
+	}
+
+	workingFolderPath := filepath.Join(folderPath, workingFolderName)
+	gitignoreFilePath := filepath.Join(folderPath, gitignoreFileName)
 
 	fmt.Println(workingFolderPath)
 	fmt.Println(gitignoreFilePath)
 
-	gitIgnoreFile, err := os.OpenFile(gitignoreFilePath, os.O_RDWR|os.O_CREATE, 0666)
+	_, err = os.Stat(gitignoreFilePath)
+	if !os.IsNotExist(err) {
+		err = os.Remove(gitignoreFilePath)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	gitIgnoreFile, err := os.OpenFile(gitignoreFilePath, os.O_WRONLY|os.O_CREATE, newItemsPermissions)
 	if err != nil {
 		panic(err)
 	}
-	gitIgnoreFile.WriteString("\n" + workingFolderPath + "\n")
+	gitIgnoreFile.WriteString("\n" + workingFolderName + "\n")
 
-	// Create folder with ability to for all users to read and write into it
-	err = os.Mkdir(workingFolderPath, 0666)
-	if err != nil {
+	err = os.Mkdir(workingFolderPath, newItemsPermissions)
+	if err != nil && !os.IsExist(err) {
 		panic(err)
 	}
 }
 
 func main() {
-	folderPath := ""
+	var folderPath string
+
 	argsWithoutProgram := os.Args[1:]
 	if len(argsWithoutProgram) > 0 {
 		folderPath = argsWithoutProgram[0]
