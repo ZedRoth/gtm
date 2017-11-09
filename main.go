@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"regexp"
@@ -99,6 +101,43 @@ func createWorkingFolder(folderPath string) {
 	}
 }
 
+func checkRepository(folderPath string) error {
+	if len(folderPath) == 0 {
+		folderPath = "."
+	}
+
+	folderPath, err := filepath.Abs(folderPath)
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err = os.Stat(folderPath); os.IsNotExist(err) {
+		panic(err)
+	}
+
+	gitCommand := "git"
+	gitArguments := []string{"status"}
+
+	currentWorkingDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	os.Chdir(folderPath)
+	if err != nil {
+		panic(err)
+	}
+	defer os.Chdir(currentWorkingDir)
+
+	gitStatusOutput, err := exec.Command(gitCommand, gitArguments...).Output()
+	gitStatusOutputAsString := string(gitStatusOutput)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(gitStatusOutputAsString)
+	return nil
+}
+
 func main() {
 	var folderPath string
 
@@ -108,4 +147,8 @@ func main() {
 	}
 
 	createWorkingFolder(folderPath)
+	err := checkRepository(folderPath)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
