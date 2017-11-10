@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -71,6 +70,7 @@ func createWorkingFolder(folderPath string) {
 	workingFolderPath := filepath.Join(folderPath, workingFolderName)
 	gitignoreFilePath := filepath.Join(folderPath, gitignoreFileName)
 
+	var gitignoreContent string
 	alreadyIgnored := false
 	if _, err = os.Stat(gitignoreFilePath); !os.IsNotExist(err) {
 		gitignoreContentBytes, err := ioutil.ReadFile(gitignoreFilePath)
@@ -78,7 +78,7 @@ func createWorkingFolder(folderPath string) {
 			panic(err)
 		}
 
-		gitignoreContent := string(gitignoreContentBytes)
+		gitignoreContent = string(gitignoreContentBytes)
 		alreadyIgnored, err = regexp.MatchString(workingFolderNamePattern, gitignoreContent)
 		if err != nil {
 			panic(err)
@@ -92,7 +92,11 @@ func createWorkingFolder(folderPath string) {
 		}
 		defer gitignoreFile.Close()
 
-		gitignoreFile.WriteString("\r\n\r\n# Working folder of git-task-manager\r\n" + workingFolderName + "\r\n")
+		linesToAdd := "# Working folder of git-task-manager\r\n" + workingFolderName + "\r\n"
+		if len(gitignoreContent) > 0 {
+			linesToAdd = "\r\n\r\n" + linesToAdd
+		}
+		gitignoreFile.WriteString(linesToAdd)
 	}
 
 	err = os.Mkdir(workingFolderPath, newItemsPermissions)
@@ -101,7 +105,7 @@ func createWorkingFolder(folderPath string) {
 	}
 }
 
-func checkRepository(folderPath string) error {
+func createRepositoryIfNeed(folderPath string) {
 	if len(folderPath) == 0 {
 		folderPath = "."
 	}
@@ -116,7 +120,8 @@ func checkRepository(folderPath string) error {
 	}
 
 	gitCommand := "git"
-	gitArguments := []string{"status"}
+	statusArguments := []string{"status"}
+	initArguments := []string{"init"}
 
 	currentWorkingDir, err := os.Getwd()
 	if err != nil {
@@ -128,14 +133,14 @@ func checkRepository(folderPath string) error {
 	}
 	defer os.Chdir(currentWorkingDir)
 
-	gitStatusOutput, err := exec.Command(gitCommand, gitArguments...).Output()
-	gitStatusOutputAsString := string(gitStatusOutput)
+	_, err = exec.Command(gitCommand, statusArguments...).Output()
 	if err != nil {
-		return err
+		_, err = exec.Command(gitCommand, initArguments...).Output()
 	}
 
-	fmt.Println(gitStatusOutputAsString)
-	return nil
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -147,8 +152,5 @@ func main() {
 	}
 
 	createWorkingFolder(folderPath)
-	err := checkRepository(folderPath)
-	if err != nil {
-		fmt.Println(err)
-	}
+	createRepositoryIfNeed(folderPath)
 }
