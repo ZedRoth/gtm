@@ -1,0 +1,19 @@
+﻿$ git issius init
+Command: git rev-parse gitissius
+Command: git branch # Список веток для проверки есть ли ветка gitissius локально
+Command: git branch -a # Продолжаем искать ветку gitissius удаленно в origin
+Command: git name-rev --name-only HEAD # Получаем имя текущей ветки (если нет просто полагаем, что master)
+Command: git stash # сташим изменения (копим их в базу git, чтобы потом ревертнуть при помощи stash pop)
+
+
+# Как-то запутанно создаем новую ветку gitissius
+Command: git symbolic-ref HEAD refs/heads/gitissius # Переходим на новую ветку
+Command: git clean -fdx # Все незакоммиченные файлы удаляются зачем-то, судя по всему (https://git-scm.com/docs/git-clean)
+Command: git commit --allow-empty -m Initialization # Создаем коммит с новой веткой в репозитории
+
+
+Command: git checkout master # Переходим обратно на изначальную ветку (в текущем примере master)
+Command: git stash pop # восстанавливаем накопленные изменения
+
+Command: git rev-parse gitissius
+Command: git ls-tree --full-tree -r -t -z e90e78edf11876a7df62645ea37a05cbcba3b43e
