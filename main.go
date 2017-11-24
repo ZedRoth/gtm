@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -143,6 +144,43 @@ func createRepositoryIfNeed(folderPath string) {
 	}
 }
 
+func createTaskManagerBranchIfNeed(folderPath string) {
+	const branchName = "git-task-manager"
+
+	if len(folderPath) == 0 {
+		folderPath = "."
+	}
+
+	folderPath, err := filepath.Abs(folderPath)
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err = os.Stat(folderPath); os.IsNotExist(err) {
+		panic(err)
+	}
+
+	currentWorkingDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	os.Chdir(folderPath)
+	if err != nil {
+		panic(err)
+	}
+	defer os.Chdir(currentWorkingDir)
+
+	gitCommand := "git"
+	// statusArguments := []string{"status"}
+
+	revParseOutput, err := exec.Command(gitCommand, []string{"rev-parse", branchName}...).Output()
+	if err != nil {
+		fmt.Println("there is no such object in git repository")
+	} else {
+		fmt.Printf("there is such object in git repository: %s\n", revParseOutput)
+	}
+}
+
 func main() {
 	var folderPath string
 
@@ -153,4 +191,5 @@ func main() {
 
 	createWorkingFolder(folderPath)
 	createRepositoryIfNeed(folderPath)
+	createTaskManagerBranchIfNeed(folderPath)
 }
