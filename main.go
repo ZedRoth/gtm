@@ -171,11 +171,13 @@ func createTaskManagerBranchIfNeed(folderPath string) {
 	defer os.Chdir(currentWorkingDir)
 
 	gitCommand := "git"
-	// statusArguments := []string{"status"}
 
 	revParseOutput, err := exec.Command(gitCommand, []string{"rev-parse", branchName}...).Output()
 	if err != nil {
-		fmt.Println("there is no such object in git repository")
+		fmt.Println("there is no such object in git repository so we are creating new one")
+
+		localBranchesOutput, err := exec.Command(gitCommand, []string{"rev-parse", branchName}...).Output()
+
 	} else {
 		fmt.Printf("there is such object in git repository: %s\n", revParseOutput)
 	}

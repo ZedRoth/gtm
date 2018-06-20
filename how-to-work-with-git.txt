@@ -20,5 +20,23 @@ Command: git ls-tree --full-tree -r -t -z e90e78edf11876a7df62645ea37a05cbcba3b4
 
 
 НЕОБХОДИМО ИЗМЕНИТЬ
-1) Разобраться как добавлять файлы без перехода на ветку если это возможно. Иначе - просто реализовать все через обычный add и commit с переходом и stash.
+1) Разобраться как добавлять файлы без перехода на ветку если это возможно.
+Иначе - просто реализовать все через обычный add и commit с переходом и stash.
 (https://git-scm.com/book/en/v2/Git-Internals-Git-Objects)
+
+ДОБАВИТЬ ФАЙЛЫ БЕЗ ПЕРЕХОДА НА ВЕТКУ МОЖНО, ВРОДЕ.
+Для этого нужны
+* hash-object - to add a blob object into db
+* cat-file - to display db item content
+* git cat-file -p master^{tree}
+* update-index - to include into stage
+* read-tree --prefix=subdirectoryname - to read tree into staging area
+* commit-tree - to create commit from a tree
+* write-tree - to create tree object in db
+
+File modes
+100644 - regular file
+100755 - executable file
+120000 - symbolic link
+
+040000 - tree
